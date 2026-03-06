@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google dark · digital clock (Notion widget)</title>
+    <style>
+        /* reset – google inspired, dark mode */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Google Sans', 'Product Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: transparent; /* blend seamlessly into Notion dark mode */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 16px;
+        }
+
+        /* main widget card – subtle material, dark surface */
+        .clock-card {
+            background: #1e1e1e;        /* Google dark surface */
+            border-radius: 32px;
+            padding: 28px 36px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);  /* subtle glass if background exists, negligible */
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        /* time container – uses Google's preferred weight & spacing */
+        .time {
+            font-size: 5.5rem;           /* bold, clean */
+            font-weight: 450;
+            line-height: 1.1;
+            color: #e8eaed;               /* Google dark “on-surface” primary */
+            letter-spacing: -1.5px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        /* hours & minutes – crisp */
+        .digits {
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* blinking colon – subtle, matches Google dark divider */
+        .colon {
+            font-weight: 400;
+            margin: 0 2px;
+            color: #9aa0a6;                /* muted Google grey */
+            animation: gentlePulse 1.8s infinite ease-in-out;
+            font-size: 5rem;
+        }
+
+        /* seconds – smaller, softer, google secondary text */
+        .seconds {
+            font-size: 2.8rem;
+            font-weight: 400;
+            color: #9aa0a6;                /* material grey */
+            margin-left: 8px;
+            align-self: center;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0;
+        }
+
+        /* am/pm indicator – clean, uppercase, subtle */
+        .ampm {
+            font-size: 1.5rem;
+            font-weight: 480;
+            text-transform: uppercase;
+            color: #bdc1c6;                 /* light grey */
+            margin-left: 12px;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 10px;
+            border-radius: 40px;
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
+            align-self: center;
+        }
+
+        /* day & date – google typical two-liner (or compact row) */
+        .date-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 12px;
+            width: 100%;
+            font-size: 1.3rem;
+            font-weight: 420;
+            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px 20px;
+            border-radius: 48px;
+            border: 0.5px solid rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(4px);
+        }
+
+        .day {
+            color: #e8eaed;
+            font-weight: 470;
+        }
+
+        .date {
+            font-feature-settings: "tnum";
+            color: #bdc1c6;
+        }
+
+        /* small extra detail: "UTC" or something? no, we keep clean. but we add a faint google dot */
+        .google-dot {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 14px;
+        }
+
+        .dot {
+            height: 6px;
+            width: 6px;
+            background: #5f6368;          /* dark grey dot */
+            border-radius: 50%;
+        }
+
+        .dot:nth-child(2) {
+            background: #3c4043;
+        }
+        .dot:nth-child(3) {
+            background: #5f6368;
+        }
+
+        /* blinking animation – very subtle, not distracting */
+        @keyframes gentlePulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0.9; }
+        }
+
+        /* optional hover effect (non intrusive) */
+        .clock-card:hover {
+            background: #202124;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        /* make it responsive & smaller for Notion embed */
+        @media (max-width: 400px) {
+            .time {
+                font-size: 4rem;
+            }
+            .colon {
+                font-size: 3.7rem;
+            }
+            .seconds {
+                font-size: 2.2rem;
+            }
+            .clock-card {
+                padding: 20px 24px;
+            }
+            .ampm {
+                font-size: 1.2rem;
+                padding: 2px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-card">
+        <!-- main time display: hh : mm : ss am/pm -->
+        <div class="time">
+            <span class="digits" id="hours">21</span>
+            <span class="colon">:</span>
+            <span class="digits" id="minutes">48</span>
+            <span class="seconds" id="seconds">15</span>
+            <span class="ampm" id="ampm">pm</span>
+        </div>
+
+        <!-- day, month, date – google style -->
+        <div class="date-row">
+            <span class="day" id="weekday">Tuesday</span>
+            <span class="date" id="full-date">Mar 11, 2025</span>
+        </div>
+
+        <!-- minimal decorative element, google micro-branding -->
+        <div class="google-dot">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // DOM elements
+            const hoursSpan = document.getElementById('hours');
+            const minutesSpan = document.getElementById('minutes');
+            const secondsSpan = document.getElementById('seconds');
+            const ampmSpan = document.getElementById('ampm');
+            const weekdaySpan = document.getElementById('weekday');
+            const fullDateSpan = document.getElementById('full-date');
+
+            // format helpers
+            function zeroPad(num) {
+                return num < 10 ? '0' + num : '' + num;
+            }
+
+            // get weekday name (long)
+            function getWeekday(date) {
+                return date.toLocaleDateString('en-US', { weekday: 'long' });
+            }
+
+            // get formatted date: "Mar 11, 2025" (consistent with google)
+            function getFormattedDate(date) {
+                const month = date.toLocaleDateString('en-US', { month: 'short' });    // "Mar"
+                const day = date.getDate();                                            // 11
+                const year = date.getFullYear();                                       // 2025
+                return `${month} ${day}, ${year}`;
+            }
+
+            // update time & date based on current moment
+            function updateClock() {
+                const now = new Date();
+
+                // ---------- time (12-hour format with AM/PM) ----------
+                let hours12 = now.getHours();
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+                const ampm = hours12 >= 12 ? 'PM' : 'AM';
+
+                // convert to 12-hour
+                hours12 = hours12 % 12;
+                hours12 = hours12 ? hours12 : 12; // hour '0' should be '12'
+
+                // update dom
+                hoursSpan.textContent = zeroPad(hours12);
+                minutesSpan.textContent = zeroPad(minutes);
+                secondsSpan.textContent = zeroPad(seconds);
+                ampmSpan.textContent = ampm.toLowerCase(); // "pm" / "am" – lowercase matches google material
+
+                // ---------- date ----------
+                weekdaySpan.textContent = getWeekday(now);
+                fullDateSpan.textContent = getFormattedDate(now);
+            }
+
+            // initial call
+            updateClock();
+
+            // update every second (align with seconds tick)
+            setInterval(updateClock, 1000);
+
+            // optional: tiny animation / reliability – if dom not ready, but it's fine
+        })();
+    </script>
+</body>
+</html>
